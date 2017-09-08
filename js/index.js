@@ -9,51 +9,96 @@ var i = 0;
 const $ = jQuery = require('jquery');
 
 
+/*
 
-function checkDomain(mail)
+
+        })
+ */
+function checkDomain()
 {
-    var dom = mail.split('@')[1].replace('.', '');
-    console.log('check '+dom);
-    if (!domaines.hasOwnProperty(dom))
-    {
-        domaines[dom] = null;
-        console.log('pas encore checké '+dom);
-        emailExistence.check(mail, function (err, res) {
+    $('#operation').html('Vérification des noms de domaines...');
+
+    for (var index in domaines ) {
+
+        var records = domaines[index];
+        console.log('checkDomain');
+        console.log(records);
+        console.log('emailExistence ' + domaines[index][0]['E-mail']);
+
+        var mail = domaines[index][0]['E-mail'];
+
+        emailExistence.check(mail, function (err, res, mailTreated) {
+            console.log(mailTreated);
+        });
+
+        console.log('end - emailExistence' + domaines[index]['E-mail']);
+
+        /*
+        emailExistence.check(records[0]['E-mail'], function (err, res) {
             if (res) {
-                domaines[dom] = 1;
+                res = 1;
             }
             else {
-                domaines[dom] = 0;
+                res = 0;
             }
-            console.log('emailExistence '+mail+' '+domaines[dom]);
-        })
+            var i = 0;
+            records.forEach((record) => {
+                record['checkdomain'] = res;
+                if (i == records.length) {
+                    console.log(domaines);
+                }
+                i++;
+            });
+            console.log(records);
+        });
 
-    }
-    else
-    {
-        if (domaines[dom] == null)
-        {
-            setTimeout(checkDomain(mail), 2000);
-        }else{
-            return true;
+        if (i == records.length) {
+            console.log('tous les domaines sont occupés à être checké');
         }
-
+        i++;
+        */
     }
-    console.log('fin check '+dom);
 }
 
+$('#close').click(function () {
+    const remote = require('electron').remote;
+    var window = remote.getCurrentWindow();
+    window.close();
+});
 
 ipc.on('file-opened', function (event, file) {
-    $('#operation').html('Fichier ouvert');
     var records = parse(file.content, {delimiter: ';', columns: true});
     $('#operation').html('Vérification en cours...');
-    $('#total').html(records.length);
+    $('#progress_txt').html('0/' + records.length);
+
+    var i =0;
+    records.forEach((record) => {
+        i++;
+        var dom = record['E-mail'].split('@')[1].replace('.', '');
+        if (!domaines.hasOwnProperty(dom))
+        {
+            domaines[dom] = [];
+        }
+        domaines[dom].push(record);
+
+
+        if (i == records.length)
+        {
+            checkDomain();
+        }
+    });
+
+
+/*
+
+
+
     records.forEach((record) => {
         console.log('traitement '+record['E-mail']);
         Promise.all([
             checkDomain(record['E-mail'])
         ]).then(() => {
-            var dom = record['E-mail'].split('@')[1].replace('.', '');
+
             let t = [];
             t[0] = record['E-mail'];
             t[1] = record['Prénom'].toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
@@ -77,12 +122,14 @@ ipc.on('file-opened', function (event, file) {
         })
 
     });
-
+*/
 });
 
 $('#version').html(window.location.hash.substring(1));
 
 $('#file').click(() => {
+    $('#progress').removeClass('hidden');
+    $('#operation').removeClass('hidden');
     $('#operation').html('Traitement en cours ...');
     ipc.send('open-file');
 });
@@ -94,11 +141,6 @@ ipc.on('message', function (event, text) {
     container.appendChild(message);
 });
 
-$('#close').click(function () {
-    const remote = require('electron').remote;
-    var window = remote.getCurrentWindow();
-    window.close();
-});
 
 ipc.on('mail-saved', function (event, args) {
     $('#num').html(parseInt($('#num').html()) + 1);
