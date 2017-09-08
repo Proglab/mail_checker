@@ -1,17 +1,12 @@
 const electron = require('electron');
 const ipc = electron.ipcRenderer;
 const parse = require('csv-parse/lib/sync');
-const fs = require('fs');
-const shell = electron.shell;
-const dir = __dirname + '/../files/';
-const filename = 'treated.txt';
 const emailExistence = require('email-existence');
 const ascii = /^[ -~\t\n\r]+$/;
 let domaines = {};
 
 var i = 0;
 const $ = jQuery = require('jquery');
-
 
 
 

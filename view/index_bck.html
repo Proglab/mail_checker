@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mail Checker</title>
+</head>
+<body>
+<section>
+    <div class="container">
+        <div class="row center" id="title">
+            <h2>Zebrabook</h2>
+            <h3><span id="version"></span></h3>
+        </div>
+
+        <div class="row" style="margin-top: 5em">
+            <div class="form-group center">
+                <input type="button" class="btn btn-primary btn-lg" id="file" value="Traiter le fichier"/>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 5em">
+            <div class="form-group center">
+                Traitement ... <span id="num">0</span>/<span id="total"></span>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 5em">
+            <div class="form-group center">
+                <input type="button" class="btn btn-primary btn-lg" id="close" value="Fermer"/>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 5em" id="operation">
+        </div>
+    </div>
+</section>
+
+<script src="../js/index.js"></script>
+</body>
+</html>

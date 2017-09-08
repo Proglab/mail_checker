@@ -1,39 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Moka2popsy</title>
-</head>
-<body>
-<section>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail Checker</title>
+
+    <!-- core CSS -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/font-awesome.min.css" rel="stylesheet">
+    <link href="./css/animate.min.css" rel="stylesheet">
+    <link href="./css/prettyPhoto.css" rel="stylesheet">
+    <link href="./css/main.css" rel="stylesheet">
+    <link href="./css/responsive.css" rel="stylesheet">
+</head><!--/head-->
+
+<body class="homepage" style="background-color:#f2f2f2;">
+
+<header id="header">
+    <div class="top-bar">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-xs-4">
+                    <div class="top-number"><p><i class="fa fa-envelope"></i> Mail checker  <span id="version">v0.1.0</span></p></div>
+                </div>
+                <div class="col-sm-6 col-xs-8">
+                    <div class="social">
+                        <ul class="social-share">
+                            <li><a href="#" id="close"><i class="fa fa-times-circle"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div><!--/.container-->
+    </div><!--/.top-bar-->
+
+</header><!--/header-->
+<section id="middle">
     <div class="container">
-        <div class="row center" id="title">
-            <h2>Zebrabook</h2>
-            <h3><span id="version"></span></h3>
-        </div>
+        <div class="row">
+            <div class="col-sm-12 wow center">
+                <div class="skill">
+                    <h2>Mail Checker</h2>
+                    <p>V0.1.0</p>
+                    <button type="submit" name="submit" class="btn btn-primary btn-lg" required="required">Sélectionnez un fichier csv</button>
+                </div>
+            </div>
 
-        <div class="row" style="margin-top: 5em">
-            <div class="form-group center">
-                <input type="button" class="btn btn-primary btn-lg" id="file" value="Traiter le fichier"/>
+        </div><!--/.row-->
+        <div class="row">
+
+            <div class="col-sm-12 wow">
+                <div class="skill">
+                    <div class="progress-wrap">
+                        <h3><span id="progress_txt">0/100000</span></h3>
+                        <div class="progress">
+                            <div class="progress-bar color1" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 85%" id="progress_value">
+                                <span class="bar-width" id="progress_value">80%</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-        <div class="row" style="margin-top: 5em">
-            <div class="form-group center">
-                Traitement ... <span id="num">0</span>/<span id="total"></span>
+        <div class="container">
+            <div class="center" style="visibility: visible; animation-name: fadeInDown;">
+                <div class="request">
+                    <h4><a href="#">Request a free Quote</a></h4>
+                </div>
             </div>
         </div>
-        <div class="row" style="margin-top: 5em">
-            <div class="form-group center">
-                <input type="button" class="btn btn-primary btn-lg" id="close" value="Fermer"/>
-            </div>
-        </div>
-        <div class="row" style="margin-top: 5em" id="operation">
-        </div>
-    </div>
+    </div><!--/.container-->
 </section>
-
 <script src="../js/index.js"></script>
+<script src="js/bootstrap.min.js"></script>
 </body>
 </html>
