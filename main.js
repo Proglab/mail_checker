@@ -37,6 +37,8 @@ app.on('ready', () => {
 });
 
 ipc.on('open-file', function (event) {
+
+    console.log('open-file');
     File.window = mainWindow;
     let file = File.open();
     if (file != null)
@@ -52,11 +54,11 @@ ipc.on('open-file', function (event) {
 });
 
 ipc.on('mail-save', function (event, t) {
-
+    console.log('mail-save');
     fs.appendFileSync(filename, t.join(";") + "\r\n");
     event.sender.send('mail-saved', t);
 });
 
 ipc.on('check-email-finished',function (event) {
-    console.log('FINI');
+    console.log('check-email-finished');
 });

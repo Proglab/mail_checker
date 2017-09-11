@@ -2,18 +2,36 @@ const electron = require('electron');
 const ipc = electron.ipcRenderer;
 const parse = require('csv-parse/lib/sync');
 const emailExistence = require('email-existence');
+var dns = require('dns');
 const ascii = /^[ -~\t\n\r]+$/;
 let domaines = {};
+let total = '';
 
-var i = 0;
+var save = 0;
 const $ = jQuery = require('jquery');
 
 
-/*
+function checkMx (email, index, callback) {
+    if (!/^\S+@\S+$/.test(email)) {
+        callback(null, false, index);
+        return;
+    }
+    dns.resolveMx(email.split('@')[1], function(err, addresses){
+        $('#operation').html('Vérification de '+email.split('@')[1]);
+        if (err == null && addresses.length > 0)
+        {
+            callback(null, 1, index);
+            return;
+        }
+        else
+        {
+            callback(err, 0, index);
+            return;
+        }
+    });
+};
 
 
-        })
- */
 function checkDomain()
 {
     $('#operation').html('Vérification des noms de domaines...');
@@ -23,40 +41,48 @@ function checkDomain()
         var records = domaines[index];
         console.log('checkDomain');
         console.log(records);
-        console.log('emailExistence ' + domaines[index][0]['E-mail']);
+        console.log('emailExistence ' + domaines[index][0]['mail']);
 
-        var mail = domaines[index][0]['E-mail'];
+        checkMx(domaines[index][0]['mail'], index, function(err, res, ind ){
+            console.log(err);
+            console.log(res);
 
-        emailExistence.check(mail, function (err, res, mailTreated) {
-            console.log(mailTreated);
-        });
 
-        console.log('end - emailExistence' + domaines[index]['E-mail']);
+            console.log('check ' + domaines[index][0]['mail'] + ' => ' + res);
 
-        /*
-        emailExistence.check(records[0]['E-mail'], function (err, res) {
-            if (res) {
-                res = 1;
-            }
-            else {
-                res = 0;
-            }
-            var i = 0;
-            records.forEach((record) => {
-                record['checkdomain'] = res;
-                if (i == records.length) {
-                    console.log(domaines);
+
+            for (var recordId in domaines[ind] ) {
+
+                console.log('----- traitement deb');
+                console.log(domaines[ind][recordId]);
+
+                let t = [];
+                t[0] = domaines[ind][recordId].mail;
+                t[1] = domaines[ind][recordId].civ;
+                t[2] = domaines[ind][recordId].firstname.toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
+                    return $1.toUpperCase()
+                });
+                t[3] = domaines[ind][recordId].lastname.toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
+                    return $1.toUpperCase()
+                });
+                t[4] = res;
+                console.log(domaines[ind][recordId].mail + ' -> ' + t[4]);
+                if (!ascii.test(domaines[ind][recordId].firstname) || !ascii.test(domaines[ind][recordId].lastname) || !ascii.test(domaines[ind][recordId].mail)) {
+                    t[5] = 1;
                 }
-                i++;
-            });
-            console.log(records);
+                else {
+                    t[5] = 0;
+                }
+                save++;
+                ipc.send('mail-save', t);
+
+                console.log(t);
+                console.log('----- traitement fin');
+            };
+
+
         });
 
-        if (i == records.length) {
-            console.log('tous les domaines sont occupés à être checké');
-        }
-        i++;
-        */
     }
 }
 
@@ -70,11 +96,19 @@ ipc.on('file-opened', function (event, file) {
     var records = parse(file.content, {delimiter: ';', columns: true});
     $('#operation').html('Vérification en cours...');
     $('#progress_txt').html('0/' + records.length);
+    total = records.length;
 
     var i =0;
     records.forEach((record) => {
         i++;
-        var dom = record['E-mail'].split('@')[1].replace('.', '');
+        try {
+        var dom = record['mail'].split('@')[1].replace('.', '');
+        }
+        catch (e)
+        {
+            console.log(e);
+            console.log(record);
+        }
         if (!domaines.hasOwnProperty(dom))
         {
             domaines[dom] = [];
@@ -88,41 +122,6 @@ ipc.on('file-opened', function (event, file) {
         }
     });
 
-
-/*
-
-
-
-    records.forEach((record) => {
-        console.log('traitement '+record['E-mail']);
-        Promise.all([
-            checkDomain(record['E-mail'])
-        ]).then(() => {
-
-            let t = [];
-            t[0] = record['E-mail'];
-            t[1] = record['Prénom'].toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
-                return $1.toUpperCase()
-            });
-            t[2] = record['Nom'].toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
-                return $1.toUpperCase()
-            });
-            t[3] = domaines[dom];
-            if (!ascii.test(record['Prénom']) || !ascii.test(record['Nom'])) {
-                t[4] = 1;
-            }
-            else {
-                t[4] = 0;
-            }
-
-            console.log('save mail '+record['E-mail']);
-            event.sender.send('mail-save', t);
-            console.log('fin traitement '+record['E-mail']);
-
-        })
-
-    });
-*/
 });
 
 $('#version').html(window.location.hash.substring(1));
@@ -143,5 +142,11 @@ ipc.on('message', function (event, text) {
 
 
 ipc.on('mail-saved', function (event, args) {
-    $('#num').html(parseInt($('#num').html()) + 1);
+    $('#operation').html('Sauvegarde en cours ...');
+    $('#progress_txt').html(save+'/'+total)
+    if (save == total)
+    {
+        $('#operation').html('Opération terminée');
+        ipc.send('check-email-finished');
+    }
 });

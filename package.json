@@ -9,7 +9,6 @@
     "clean:mac": "rm -rf dist/mac",
     "clean:win": "rm -rf dist/win",
     "dist:mac": "build --mac",
-    "dist:win": "build --win",
     "dist:win": "build --win"
   },
   "author": "",
