@@ -10,6 +10,26 @@ let total = '';
 var save = 0;
 const $ = jQuery = require('jquery');
 
+function checkDomainPromise(email, index)
+{
+    return new Promise((resolve, reject) => {
+        dns.resolveMx(email.split('@')[1], function(err, addresses){
+            $('#operation').html('Vérification de '+email.split('@')[1]);
+            if (err == null && addresses.length > 0)
+            {
+                resolve({err: null, res: 1, index: index});
+            }
+            else
+            {
+                resolve({err: err, res: 0, index: index});
+            }
+        });
+    });
+}
+
+
+
+
 
 function checkMx (email, index, callback) {
     if (!/^\S+@\S+$/.test(email)) {
@@ -42,6 +62,34 @@ function checkDomain()
         console.log('checkDomain');
         console.log(records);
         console.log('emailExistence ' + domaines[index][0]['mail']);
+
+
+        checkDomainPromise(domaines[index][0]['mail'], index).then(
+            (value) => {
+                for (var recordId in domaines[value.index] ) {
+                    let t = [];
+                    t[0] = domaines[value.index][recordId].mail;
+                    t[1] = domaines[value.index][recordId].civ;
+                    t[2] = domaines[value.index][recordId].firstname.toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
+                        return $1.toUpperCase()
+                    });
+                    t[3] = domaines[value.index][recordId].lastname.toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
+                        return $1.toUpperCase()
+                    });
+                    t[4] = value.res;
+                    if (!ascii.test(domaines[value.index][recordId].firstname) || !ascii.test(domaines[value.index][recordId].lastname) || !ascii.test(domaines[value.index][recordId].mail)) {
+                        t[5] = 1;
+                    }
+                    else {
+                        t[5] = 0;
+                    }
+                    save++;
+                    ipc.send('mail-save', t);
+                }
+            }
+        )
+
+/*
 
         checkMx(domaines[index][0]['mail'], index, function(err, res, ind ){
             console.log(err);
@@ -82,7 +130,7 @@ function checkDomain()
 
 
         });
-
+*/
     }
 }
 
@@ -142,7 +190,6 @@ ipc.on('message', function (event, text) {
 
 
 ipc.on('mail-saved', function (event, args) {
-    $('#operation').html('Sauvegarde en cours ...');
     $('#progress_txt').html(save+'/'+total)
     if (save == total)
     {

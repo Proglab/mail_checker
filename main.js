@@ -11,6 +11,9 @@ let mainWindow;
 const Window = require('./class/Window').Window;
 const File = require('./class/File').File;
 
+let fileContent = '';
+
+
 
 let filename = '';
 
@@ -55,10 +58,14 @@ ipc.on('open-file', function (event) {
 
 ipc.on('mail-save', function (event, t) {
     console.log('mail-save');
-    fs.appendFileSync(filename, t.join(";") + "\r\n");
+    fileContent += t.join(";") + "\r\n";
+
+    //fs.appendFileSync(filename, t.join(";") + "\r\n");
     event.sender.send('mail-saved', t);
 });
 
 ipc.on('check-email-finished',function (event) {
+    fs.appendFileSync(filename, fileContent);
     console.log('check-email-finished');
+
 });
