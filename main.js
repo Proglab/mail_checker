@@ -17,10 +17,6 @@ let fileContent = '';
 
 let filename = '';
 
-
-// Prevent window being garbage collected
-
-
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
@@ -56,16 +52,16 @@ ipc.on('open-file', function (event) {
     }
 });
 
+
 ipc.on('mail-save', function (event, t) {
     console.log('mail-save');
     fileContent += t.join(";") + "\r\n";
-
-    //fs.appendFileSync(filename, t.join(";") + "\r\n");
     event.sender.send('mail-saved', t);
 });
 
 ipc.on('check-email-finished',function (event) {
     fs.appendFileSync(filename, fileContent);
     console.log('check-email-finished');
-
+    event.sender.send('finished');
+    fileContent = '';
 });

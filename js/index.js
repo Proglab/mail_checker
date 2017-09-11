@@ -27,31 +27,6 @@ function checkDomainPromise(email, index)
     });
 }
 
-
-
-
-
-function checkMx (email, index, callback) {
-    if (!/^\S+@\S+$/.test(email)) {
-        callback(null, false, index);
-        return;
-    }
-    dns.resolveMx(email.split('@')[1], function(err, addresses){
-        $('#operation').html('Vérification de '+email.split('@')[1]);
-        if (err == null && addresses.length > 0)
-        {
-            callback(null, 1, index);
-            return;
-        }
-        else
-        {
-            callback(err, 0, index);
-            return;
-        }
-    });
-};
-
-
 function checkDomain()
 {
     $('#operation').html('Vérification des noms de domaines...');
@@ -88,49 +63,6 @@ function checkDomain()
                 }
             }
         )
-
-/*
-
-        checkMx(domaines[index][0]['mail'], index, function(err, res, ind ){
-            console.log(err);
-            console.log(res);
-
-
-            console.log('check ' + domaines[index][0]['mail'] + ' => ' + res);
-
-
-            for (var recordId in domaines[ind] ) {
-
-                console.log('----- traitement deb');
-                console.log(domaines[ind][recordId]);
-
-                let t = [];
-                t[0] = domaines[ind][recordId].mail;
-                t[1] = domaines[ind][recordId].civ;
-                t[2] = domaines[ind][recordId].firstname.toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
-                    return $1.toUpperCase()
-                });
-                t[3] = domaines[ind][recordId].lastname.toLowerCase().replace(/^(.)|\s+(.)/g, function ($1) {
-                    return $1.toUpperCase()
-                });
-                t[4] = res;
-                console.log(domaines[ind][recordId].mail + ' -> ' + t[4]);
-                if (!ascii.test(domaines[ind][recordId].firstname) || !ascii.test(domaines[ind][recordId].lastname) || !ascii.test(domaines[ind][recordId].mail)) {
-                    t[5] = 1;
-                }
-                else {
-                    t[5] = 0;
-                }
-                save++;
-                ipc.send('mail-save', t);
-
-                console.log(t);
-                console.log('----- traitement fin');
-            };
-
-
-        });
-*/
     }
 }
 
@@ -190,10 +122,27 @@ ipc.on('message', function (event, text) {
 
 
 ipc.on('mail-saved', function (event, args) {
-    $('#progress_txt').html(save+'/'+total)
+    console.log('mail-saved');
+    $('#progress_txt').html(save+'/'+total);
+    var pourcent = Math.floor(save / total * 100);
+    $('#progress_bar').html('<span class="bar-width" id="progress_value">'+pourcent+'%</span>');
+    $('#progress_bar').attr('aria-valuenow', pourcent);
+    $('#progress_bar').attr('style', 'width: '+pourcent+'%');
+
+
     if (save == total)
     {
-        $('#operation').html('Opération terminée');
+        $('#operation').html('Sauvegarde en cours');
         ipc.send('check-email-finished');
     }
+});
+
+ipc.on('finished', function (event, args) {
+    save = 0;
+    domaines = {};
+    total = 0;
+    $('#progress_bar').html('<span class="bar-width" id="progress_value">0%</span>');
+    $('#progress_bar').attr('aria-valuenow', 0);
+    $('#progress_bar').attr('style', 'width: 0%');
+    $('#operation').html('Traitement terminé');
 });
